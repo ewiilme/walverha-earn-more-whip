@@ -1,8 +1,9 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 interface AuthScreenProps {
@@ -11,106 +12,104 @@ interface AuthScreenProps {
 
 export const AuthScreen = ({ onLogin }: AuthScreenProps) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email.trim()) {
+      toast("Please enter your email");
+      return;
+    }
+
+    setIsLoading(true);
     
-    if (!email || !password) {
-      toast("Please fill in all fields");
-      return;
-    }
-
-    if (!email.includes("@")) {
-      toast("Please enter a valid email");
-      return;
-    }
-
-    if (password.length < 6) {
-      toast("Password must be at least 6 characters");
-      return;
-    }
-
-    // Simulate authentication
-    if (isLogin) {
-      // Check if user exists in localStorage
-      const userData = localStorage.getItem(`walverha_${email}`);
-      if (userData) {
-        onLogin(email);
-      } else {
-        toast("User not found. Please register first.");
-      }
-    } else {
-      // Register new user
-      const existingData = localStorage.getItem(`walverha_${email}`);
-      if (existingData) {
-        toast("User already exists. Please login instead.");
-      } else {
-        // Create new user data
-        localStorage.setItem(`walverha_${email}`, JSON.stringify({
-          email,
-          whaBalance: 0,
-          currentMultiplier: 1.0,
-          offlineHoursAvailable: 0,
-          adsWatchedMultiplier: 0,
-          adsWatchedOffline: 0
-        }));
-        toast("Registration successful! Please login.");
-        setIsLogin(true);
-      }
-    }
+    // Simulate login delay
+    setTimeout(() => {
+      onLogin(email.trim());
+      setIsLoading(false);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/10 backdrop-blur-lg border-white/20">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-white mb-2">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <img 
+            src="/lovable-uploads/a47d9812-f8f7-45b1-82d3-4a321fbce9e6.png" 
+            alt="Walverha Coin"
+            className="w-24 h-24 mx-auto mb-4 rounded-full shadow-2xl"
+          />
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-['Orbitron'] mb-2">
             Walverha
-          </CardTitle>
-          <CardDescription className="text-white/80">
-            {isLogin ? "Welcome back!" : "Create your account"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-              />
+          </h1>
+          <p className="text-purple-300 font-['Orbitron']">Earn More WHA</p>
+        </div>
+
+        <Card className="bg-gradient-to-br from-purple-800/30 to-indigo-800/30 backdrop-blur-lg border-purple-500/30">
+          <CardHeader>
+            <CardTitle className="text-center text-purple-300 font-['Orbitron']">
+              Welcome Back
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email" className="text-purple-300 font-['Orbitron']">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="bg-black/20 border-purple-500/30 text-white placeholder:text-purple-400 font-['Orbitron']"
+                  disabled={isLoading}
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 font-['Orbitron']"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing In..." : "Sign In"}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-purple-400 text-sm font-['Orbitron']">
+                Start earning WHA coins today!
+              </p>
             </div>
-            <div>
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/60"
-              />
-            </div>
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              {isLogin ? "Login" : "Register"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-white/80 hover:text-white underline"
-            >
-              {isLogin ? "Need an account? Register" : "Have an account? Login"}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        {/* Features */}
+        <div className="mt-8 space-y-4">
+          <Card className="bg-gradient-to-br from-purple-800/20 to-indigo-800/20 backdrop-blur-lg border-purple-500/20">
+            <CardContent className="p-4">
+              <h3 className="text-purple-300 font-bold mb-2 font-['Orbitron']">🎯 Tap to Earn</h3>
+              <p className="text-purple-200 text-sm font-['Orbitron']">Tap the Walverha logo to earn WHA coins instantly</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-800/20 to-indigo-800/20 backdrop-blur-lg border-purple-500/20">
+            <CardContent className="p-4">
+              <h3 className="text-purple-300 font-bold mb-2 font-['Orbitron']">📺 Watch Ads</h3>
+              <p className="text-purple-200 text-sm font-['Orbitron']">Increase your multiplier and enable offline earning</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-800/20 to-indigo-800/20 backdrop-blur-lg border-purple-500/20">
+            <CardContent className="p-4">
+              <h3 className="text-purple-300 font-bold mb-2 font-['Orbitron']">💰 Withdraw USDT</h3>
+              <p className="text-purple-200 text-sm font-['Orbitron']">Convert your WHA to USDT when you reach minimum threshold</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
