@@ -19,6 +19,7 @@ export interface UserData {
 const Index = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>("auth");
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -27,6 +28,12 @@ const Index = () => {
       const user = JSON.parse(savedUser);
       setUserData(user);
       setCurrentScreen("home");
+    }
+
+    // Load theme preference
+    const savedTheme = localStorage.getItem("walverha_theme");
+    if (savedTheme === "dark") {
+      setIsDarkTheme(true);
     }
   }, []);
 
@@ -69,10 +76,20 @@ const Index = () => {
     localStorage.setItem(`walverha_${userData.email}`, JSON.stringify(updatedData));
   };
 
+  const toggleTheme = () => {
+    const newTheme = !isDarkTheme;
+    setIsDarkTheme(newTheme);
+    localStorage.setItem("walverha_theme", newTheme ? "dark" : "light");
+  };
+
+  const themeClasses = isDarkTheme 
+    ? "bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900" 
+    : "bg-gradient-to-br from-purple-100 via-indigo-100 to-slate-100";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900">
+    <div className={`min-h-screen ${themeClasses}`}>
       {currentScreen === "auth" && (
-        <AuthScreen onLogin={handleLogin} />
+        <AuthScreen onLogin={handleLogin} isDarkTheme={isDarkTheme} />
       )}
       {currentScreen === "home" && userData && (
         <HomeScreen 
@@ -80,12 +97,15 @@ const Index = () => {
           onUpdateUserData={updateUserData}
           onNavigate={setCurrentScreen}
           onLogout={handleLogout}
+          isDarkTheme={isDarkTheme}
+          onToggleTheme={toggleTheme}
         />
       )}
       {currentScreen === "wallet" && userData && (
         <WalletScreen 
           userData={userData}
           onNavigate={setCurrentScreen}
+          isDarkTheme={isDarkTheme}
         />
       )}
     </div>
